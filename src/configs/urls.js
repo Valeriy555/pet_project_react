@@ -1,9 +1,10 @@
-const baseURL  = 'http://localhost:5003/'
-// const baseURL  = 'https://jsonplaceholder.typicode.com'
+const baseURL = 'http://localhost:5003/'
 
 const urls = {
-    users: '/users'
-}
+    users: '/users',
+    containers: '/containers',
+    stages: '/stages',
+   }
 
 export {
     baseURL,

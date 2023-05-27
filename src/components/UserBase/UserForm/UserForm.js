@@ -1,9 +1,10 @@
 import {useEffect} from "react";
 import {useForm} from "react-hook-form";
 import {joiResolver} from "@hookform/resolvers/joi";
+import {useNavigate} from "react-router-dom";
 
-import {userService} from "../../services";
-import {userValidator} from "../../validators";
+import {userService} from "../../../services";
+import {userValidator} from "../../../validators";
 import css from "./UserForm.module.css";
 
 const UserForm = ({setNewUser, userForUpdate, setUpdatedUser, setUserForUpdate}) => {
@@ -49,21 +50,28 @@ const UserForm = ({setNewUser, userForUpdate, setUpdatedUser, setUserForUpdate})
         reset();
     }
 
+    const navigate = useNavigate()
+
     return (
         <div className={css.FormWrap}>
 
-            <form onSubmit={handleSubmit(submit)} >
+            <form onSubmit={handleSubmit(submit)}>
 
                 <input type="text" placeholder={'name'} {...register('name')} className={css.input}/>
-                <input type="text" placeholder={'age'} {...register('age', {valueAsNumber: true})} className={css.input}/>
+                <input type="text" placeholder={'age'} {...register('age', {valueAsNumber: true})}
+                       className={css.input}/>
                 <input type="text" placeholder={'email'} {...register('email')} className={css.input}/>
                 <input type="text" placeholder={'password'} {...register('password')} className={css.input}/>
 
                 <button disabled={!isValid} className={css.Btn}>{userForUpdate ? 'Update changes' : 'Create'}</button>
-                {/*<button >{userForUpdate ? 'Update changes' : 'Create'}</button>*/}
                 {
                     !!userForUpdate && <button onClick={clearForm}>clear form</button>
                 }
+
+                <button
+                    onClick={() => navigate(`/`)}>
+                    Click to back to Start Page
+                </button>
 
                 <div className={css.errorForm}>
                     {errors.name && <span>{errors.name.message}</span>}

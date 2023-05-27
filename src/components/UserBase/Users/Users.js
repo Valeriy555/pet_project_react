@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-import {userService} from "../../services";
+import {userService} from "../../../services";
 import {User} from "./User";
 import css from "./Users.module.css";
 
@@ -36,7 +36,7 @@ const Users = ({newUser, setUserForUpdate, updatedUser}) => {
     return (
         <div>
 
-            <div className={css.Users}>
+            <div className={css.UsersWrap }>
 
                 {users.map((user, index) => <User key={user._id} user={user} index={index}
                                                   setUserForUpdate={setUserForUpdate}

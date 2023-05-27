@@ -1,0 +1,14 @@
+.WrapApp {
+    background: silver;
+    border: 1px solid brown;
+    height: calc(100vh - 2px);
+    margin: 0;
+    display: flex;
+    overflow: hidden;
+
+}
+
+.link {
+    border: 1px solid brown;
+    width: 15%;
+}

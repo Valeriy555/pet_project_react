@@ -1,8 +1,11 @@
-.FormWrap{
+.FormWrap {
     background: lightgray;
-    border: 1px solid brown;
+    border-bottom: 1px solid brown;
+    display: flex;
     justify-content: center;
     padding: 13px;
+    width: 100%;
+    height: 5%;
 }
 
 .input {
@@ -14,7 +17,7 @@
     color: red;
 }
 
-.Btn{
+.Btn {
     background: antiquewhite;
     border: 1px solid brown;
     margin-left: 3px;
