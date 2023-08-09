@@ -29,6 +29,9 @@ const containerValidator = Joi.object({
     stage: Joi.string().required().messages({
         'string.empty': 'Помилка!!stage не може бути пустим!!!',
     }),
+    user: Joi.string().required().messages({
+        'string.empty': 'Помилка!!user не може бути пустим!!!',
+    }),
 
 });
 

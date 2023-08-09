@@ -1,9 +1,10 @@
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import {useForm} from "react-hook-form";
 import {joiResolver} from "@hookform/resolvers/joi";
 
-import {containerService, inspectionStageService} from "../../../services";
+import {containerService} from "../../../services";
 import {containerValidator} from "../../../validators";
+import {UserSelect, StageSelect} from "../../Selects";
 import css from "./ContainerForm.module.css";
 
 
@@ -11,22 +12,22 @@ const ContainerForm = ({setNewCont, contForUpdate, setUpdatedCont, setContForUpd
 
     const {register, handleSubmit, reset, formState: {errors, isValid}, setValue} = useForm({
         resolver: joiResolver(containerValidator),
-        mode: 'onTouched',
+        // mode: 'onTouched',
+        mode: 'onChange', // Обновленный режим для реагирования на изменения
     });
 
-    const [stages, setStages] = useState([]);
     const [selectedStage, setSelectedStage] = useState('');
+    const stageSelectRef = useRef(null);
     const [isStageChanged, setIsStageChanged] = useState(false); // флаг для отслеживания изменения значения stage
 
-    useEffect(() => {
-        inspectionStageService.getAll().then(({data}) => setStages(data));
-    }, []);
+    const [selectedUser, setSelectedUser] = useState('');
+    const userSelectRef = useRef(null);
+    const [isUserChanged, setIsUserChanged] = useState(false);
 
     useEffect(() => {
 
-        inspectionStageService.getAll().then(({data}) => setStages(data));
         if (contForUpdate) {
-            const {shipper, consignee, forwarder, goods, container, consignment, stage} = contForUpdate;
+            const {shipper, consignee, forwarder, goods, container, consignment, stage, user} = contForUpdate;
             setValue('shipper', shipper)
             setValue('consignee', consignee)
             setValue('forwarder', forwarder)
@@ -34,8 +35,9 @@ const ContainerForm = ({setNewCont, contForUpdate, setUpdatedCont, setContForUpd
             setValue('container', container)
             setValue('consignment', consignment)
             setValue('stage', stage._id.toString(), {shouldValidate: true})
+            setValue('user', user._id.toString(), {shouldValidate: true})
         }
-    }, [contForUpdate]);
+    }, [contForUpdate, setValue]);
 
     const handleStageChange = (event) => {
         const selectedValue = event.target.value;
@@ -45,39 +47,56 @@ const ContainerForm = ({setNewCont, contForUpdate, setUpdatedCont, setContForUpd
         setSelectedStage(selectedValue);
     }
 
+    const handleInspectorChange = (event) => {
+        const selectedValue = event.target.value;
+        if (contForUpdate && contForUpdate.user && contForUpdate.user._id) {
+            setIsUserChanged(selectedValue !== contForUpdate.user._id.toString());
+        }
+        setSelectedUser(selectedValue);
+    }
+
     const submit = async (container) => {
         try {
             if (contForUpdate) {
-                const {data} = await containerService.updateById(contForUpdate._id, {
+                const updatedContainer = {
                     shipper: container.shipper,
                     consignee: container.consignee,
                     forwarder: container.forwarder,
                     goods: container.goods,
                     container: container.container,
                     consignment: container.consignment,
-                    // stage: container.stage,
                     stage: isStageChanged ? selectedStage : container.stage, // используем измененное значение stage, если оно было изменено
-                });
+                    user: isUserChanged ? selectedUser : container.user, // используем измененное значение stage, если оно было изменено
+                };
 
+                const {data} = await containerService.updateById(contForUpdate._id, updatedContainer);
                 setUpdatedCont(data);
                 setContForUpdate(false);
             } else {
-                const {data} = await containerService.create(container);
+                const newContainer = {
+                    ...container,
+                    stage: selectedStage,
+                    user: selectedUser,
+                };
+                const {data} = await containerService.create(newContainer);
                 setNewCont(data)
 
             }
             reset()
             setIsStageChanged(false); // сбрасываем флаг изменения значения stage после отправки формы
+            setIsUserChanged(false); // сбрасываем флаг изменения значения stage после отправки формы
         } catch (e) {
-            // setFormError(e.response.data)
+            // Обработка ошибки
         }
     };
 
     const clearForm = () => {
         setContForUpdate(false);
         reset();
+        setSelectedStage(''); // Сбрасываем значение selectedStage
+        setSelectedUser(''); // Сбрасываем значение selectedUser
     }
-
+    console.log('isValid:', isValid);
 
     return (
         <div className={css.FormWrap}>
@@ -91,24 +110,17 @@ const ContainerForm = ({setNewCont, contForUpdate, setUpdatedCont, setContForUpd
                 <input type="text" placeholder={'container'} {...register('container')} className={css.input}/>
                 <input type="text" placeholder={'consignment'} {...register('consignment')} className={css.input}/>
 
-                <select className={css.select} onChange={handleStageChange}
-                        defaultValue={selectedStage}
+                <StageSelect selectedStage={selectedStage} onChange={handleStageChange} ref={stageSelectRef}/>
+                <UserSelect selectedUser={selectedUser} onChange={handleInspectorChange} ref={userSelectRef}/>
 
-                        {...register('stage')}>
-                    {stages.map((stage) => (
-                        <option key={stage._id} value={stage._id}>{stage.stage}</option>
-                    ))}
-                </select>
 
                 {Object.keys(errors).length === 0 && (
-                    <button
-                        disabled={!isValid}
-                        className={css.Btn}>{contForUpdate ? 'Update changes' : 'Create'}</button>
+                    <button disabled={!isValid} className={css.Btn}>
+                        {contForUpdate ? 'Update changes' : 'Create'}
+                    </button>
                 )}
 
-                {
-                    !!contForUpdate && <button onClick={clearForm}>clear form</button>
-                }
+                {contForUpdate && <button onClick={clearForm}>clear form</button>}
 
 
                 <div className={css.errorForm}>
@@ -120,6 +132,7 @@ const ContainerForm = ({setNewCont, contForUpdate, setUpdatedCont, setContForUpd
                     {errors.container && <span>{errors.container.message}</span>}
                     {errors.consignment && <span>{errors.consignment.message}</span>}
                     {errors.stage && <span>{errors.stage.message}</span>}
+                    {errors.user && <span>{errors.user.message}</span>}
 
                 </div>
 

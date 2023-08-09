@@ -4,6 +4,7 @@ const urls = {
     users: '/users',
     containers: '/containers',
     stages: '/stages',
+
    }
 
 export {

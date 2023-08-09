@@ -2,7 +2,7 @@ import {containerService} from "../../../services";
 import css from './Conteiner.module.css'
 
 const Container = ({cont, setContForUpdate, setDeletedContainerId}) => {
-    const {_id, shipper, consignee, forwarder, goods, container, consignment, stage} = cont;
+    const {_id, shipper, consignee, forwarder, goods, container, consignment, stage, user} = cont;
 
     const deleteContainer = async () => {
         await containerService.deleteById(_id);
@@ -21,6 +21,7 @@ const Container = ({cont, setContForUpdate, setDeletedContainerId}) => {
                 <p> {container}</p>
                 <p> {consignment}</p>
                 <p> {stage && stage.stage}</p>
+                <p> {user && user.name}</p>
 
             </div>
 
